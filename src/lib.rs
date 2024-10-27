@@ -118,7 +118,6 @@ pub fn enum_injector(attr: TokenStream, item: TokenStream) -> TokenStream {
             #(#enum_fields),*
         }
     };
-    eprintln!("{}", token.to_token_stream());
     TokenStream::from(token)
 }
 
