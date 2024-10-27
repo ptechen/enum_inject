@@ -13,6 +13,6 @@ enum Foo {
 
 #[test]
 fn test() {
-    println!("{}", Foo::ABB);
-    println!("{}", Foo::AABBB as i32);
+    assert_eq!("ABB", Foo::ABB.to_string());
+    assert_eq!(3000, Foo::AABBB as i32);
 }

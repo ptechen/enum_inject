@@ -5,8 +5,8 @@
 [![docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/enum_inject)
 [![dependency status](https://deps.rs/crate/enum_inject/0.1.2/status.svg)](https://deps.rs/crate/enum_inject)
 
-## example:
-    
+# example:
+```rust
     use enum_inject::{enum_injector, EnumInjector};
     use display_enum::Display;
     #[derive(EnumInjector)]
@@ -21,6 +21,7 @@
 
     #[test]
     fn test() {
-        println!("{}", Foo::ABB);
-        println!("{}", Foo::AABBB as i32);
+        assert_eq!("ABB", Foo::ABB.to_string());
+        assert_eq!(3000, Foo::AABBB as i32);
     }
+```
