@@ -8,7 +8,7 @@ use serde::Deserialize;
 use syn::{parse_macro_input, ItemEnum, Expr, Variant, Fields, ExprLit, Lit, LitInt};
 use syn::token::Eq;
 
-#[proc_macro_derive(EnumInjector, attributes(skip))]
+#[proc_macro_derive(EnumInjector, attributes(skip,sync_attr))]
 pub fn enum_display_derive(_: TokenStream) -> TokenStream {
     TokenStream::from(quote! {})
 }
@@ -27,6 +27,9 @@ struct AttrArg {
     suffix: String,
     /// 计算
     compute: Compute,
+    /// 同步属性
+    #[serde(default)]
+    sync_attr: bool,
 }
 
 impl AttrArg {
@@ -58,6 +61,12 @@ pub fn enum_injector(attr: TokenStream, item: TokenStream) -> TokenStream {
         derives.push(quote! {#ident});
     }
     let input = parse_macro_input!(item as ItemEnum);
+    let mut global_sync_attr = false;
+    for attr in &input.attrs {
+        if attr.path().is_ident("sync_attr") {
+            global_sync_attr = true;
+        }
+    }
     let pub_str = &input.vis;
     let name = &input.ident;
     let mut enum_fields = vec![];
@@ -71,19 +80,29 @@ pub fn enum_injector(attr: TokenStream, item: TokenStream) -> TokenStream {
             index = expr.lit.to_token_stream().to_string().parse::<isize>().unwrap();
         };
         let mut flag = true;
+        let mut sync_attr = false;
         for attr in variant.attrs.iter() {
             if attr.path().is_ident("skip") {
                 flag = false;
+            } else if attr.path().is_ident("sync_attr") {
+                sync_attr = true;
             }
         }
         if flag {
             for arg in &args.args {
+                if !sync_attr {
+                    sync_attr = arg.sync_attr;
+                }
                 let index_str = arg.get_index(index).to_string();
                 let new_ident = format!("{}{}{}", arg.prefix, ident.to_string(), arg.suffix);
                 let new_ident = Ident::new(&new_ident, Span::call_site());
                 let expr = Expr::Lit(ExprLit{ attrs: vec![], lit: Lit::from(LitInt::new(index_str.as_str(), Span::call_site())) });
+                let mut attrs = vec![];
+                if global_sync_attr || sync_attr {
+                    attrs = variant.attrs.clone();
+                }
                 let new_variant = Variant{
-                    attrs: vec![],
+                    attrs,
                     ident: new_ident,
                     fields: Fields::Unit,
                     discriminant: Some((Eq::default(), expr)),
@@ -99,7 +118,7 @@ pub fn enum_injector(attr: TokenStream, item: TokenStream) -> TokenStream {
             #(#enum_fields),*
         }
     };
-    // eprintln!("{}", token.to_token_stream());
+    eprintln!("{}", token.to_token_stream());
     TokenStream::from(token)
 }
 
