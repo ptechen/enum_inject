@@ -1,5 +1,10 @@
 # enum_inject
 
+[![Version info](https://img.shields.io/crates/v/enum_from_derive.svg)](https://crates.io/crates/enum_inject)
+[![Downloads](https://img.shields.io/crates/d/enum_inject.svg?style=flat-square)](https://crates.io/crates/enum_inject)
+[![docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/enum_inject)
+[![dependency status](https://deps.rs/crate/enum_inject/0.1.1/status.svg)](https://deps.rs/crate/enum_inject)
+
 ## example:
     
     use enum_inject::{enum_injector, EnumInjector};
